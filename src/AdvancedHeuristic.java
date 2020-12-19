@@ -39,6 +39,7 @@ public class AdvancedHeuristic implements Heuristic {
 		return this.getMinimumRequiredMoves(state);
 	}
 	
+        //menghitung gerakan minimal untuk mencapai solusi
 	private int getMinimumRequiredMoves(State state) {
 		visited.add(0);
 		
@@ -54,6 +55,7 @@ public class AdvancedHeuristic implements Heuristic {
 		return value;
 	}
 	
+        //
 	private ArrayList<Integer> getInitialBlockingCars() {		
 		ArrayList<Integer> blocking = new ArrayList<Integer>();
 		
@@ -86,6 +88,7 @@ public class AdvancedHeuristic implements Heuristic {
 		return blocking;	
 	}
 	
+        //method untuk mengidentifikasi mobil yang menghalangi
 	private int getBlockingValue(int car, int needsSpaceFront, int needsSpaceBack) {
 		visited.add(car);
 		
@@ -106,30 +109,42 @@ public class AdvancedHeuristic implements Heuristic {
 			
 			int valueFwd = 0, valueBwd = 0;
 			
+                        //memeriksa apakah mobil dapat bergerak maju atau mundur
 			boolean fwdMoveable = canMove(car, next, needsSpaceFront, true);
 			boolean bwdMoveable = canMove(car, next, needsSpaceBack, false);
 			
+                        //memeriksa space yang dibutuhkan di depan dan belakang mobil
 			int needsSpaceFwd = needsSpace(car, next, needsSpaceFront, true);
 			int needsSpaceBwd = needsSpace(car, next, needsSpaceBack, false);
 			
+                        //jika mobil tidak dapat bergerak maju, method dipanggil secara recursive
+                        //untuk menargetkan mobil yang menghalangi.
+                        //jika yang menghalangi di depan adalah wall, maka mobil tidak dapat bergerak maju
+                        //valueFwd diisi dengan nilai infinite.
 			if (!fwdMoveable) {
 				valueFwd = getBlockingValue(next, needsSpaceFwd, needsSpaceBwd);
 			} else if (isWallBlocking(car, needsSpaceFront, true)) {
 				valueFwd = Integer.MAX_VALUE;
 			}
 			
+                        //jika mobil tidak dapat bergerak mundur, method dipanggil secara recursive
+                        //untuk menargetkan mobil yang menghalangi.
+                        //jika yang menghalangi di depan adalah wall, maka mobil tidak dapat bergerak mundur
+                        //valueBwd diisi dengan nilai infinite.
 			if (!bwdMoveable) {
 				valueBwd = getBlockingValue(next, needsSpaceFwd, needsSpaceBwd);
 			} else if (isWallBlocking(car, needsSpaceBack, false)) {
 				valueBwd = Integer.MAX_VALUE;
 			}
 			
+                        //blocking value ditambahkan dengan nilai blocking maju atau mundur yang lebih kecil
 			value += Math.min(valueFwd, valueBwd);
 		}
 		
 		return value;
 	}
 	
+        //method untuk memeriksa apakah mobil dapat bergerak
 	private boolean canMove(int car, int next, int needsSpace, boolean direction) {
 		boolean isBehind = isBehind(car, next);
 		
