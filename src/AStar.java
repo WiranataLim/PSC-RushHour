@@ -15,8 +15,7 @@ import java.util.List;
  */
 public class AStar {
 
-    /** The solution path is stored here */
-    public State[] path;
+    public State[] path; //Variabel untuk menyimpan path menuju solusi
     
     private List<HeuristicNode> open = new ArrayList<HeuristicNode>(); //List untuk menyimpan node open
     private List<HeuristicNode> closed = new ArrayList<HeuristicNode>(); //List untuk menyimpan node closed
@@ -26,57 +25,49 @@ public class AStar {
      * solution for the given puzzle using the given heuristic.
      */
     public AStar(Puzzle puzzle, Heuristic heuristic) {
+    	int h = heuristic.getValue(puzzle.getInitNode().getState()); //Mengambil nilai heuristic dari node
+    	HeuristicNode root = new HeuristicNode(puzzle.getInitNode(), h); //Inisialisasi node root dengan cost heuristic dan path
     	
-    	// Initialize root node w/ heuristics and path costs
-    	int h = heuristic.getValue(puzzle.getInitNode().getState()); //mengambil nilai heuristic dari node
-    	HeuristicNode root = new HeuristicNode(puzzle.getInitNode(), h); 
+    	open.add(root);	//Menambahkan node root ke open list
     	
-    	open.add(root);	// Add the root node to the open list
-    	
-    	while(!open.isEmpty()) {
+    	while(!open.isEmpty()) { //Hanya dijalankan ketika list open sudah diisi
+            HeuristicNode current = open.remove(0); //Current node diambil dari list open
     		
-    		// Only performs sort if list was changed
-    		//open.sort();
-    		
-    		HeuristicNode current = open.remove(0);
-    		
-    		if (current.getState().isGoal()) {
+            if (current.getState().isGoal()) {
+                //Jika state node current adalah goal, maka depth menuju current disimpan
+                //dengan mengambil depth current node dan +1 untuk memasukkan node root
+                path = new State[current.getDepth() + 1];
     			
-    			// Set the path array size to depth of goal state;
-    			// The +1 should be necessary to also include root node.
-    			path = new State[current.getDepth() + 1]; //membuat path baru 
+                //Current node diisi ke path node
+                HeuristicNode pathNode = current;
     			
-    			// Set the current node to pathNode
-    			HeuristicNode pathNode = current;
+                //Mengambil state dari semua node yang ada di path dan disimpan ke array path
+                //Untuk mendapatkan path, current node (path node) digantikan dengan parentnya
+                //hingga parent dari current bernilai null
+                while (pathNode != null) {
+                    path[pathNode.getDepth()] = pathNode.getState();
+                    pathNode = (HeuristicNode) pathNode.getParent();
+                } 
     			
-    			// Get state for every node and store it in the path array,
-    			// then override current path node with its parent node until parent is null.
-    			while (pathNode != null) {
-    				path[pathNode.getDepth()] = pathNode.getState();
-    				pathNode = (HeuristicNode) pathNode.getParent();
-    			} 
-    			
-    			// We found a solution, stop.
-    			return;
-    		}
+                //Solusi ditemukan
+                return;
+            }
     		
-    		closed.add(current);
+            closed.add(current); //Node current ditutup
     		
-                //Expand node
-    		for (Node successor : current.expand()) {
+            //Jika current bukan goal, maka node di-expand
+            for (Node successor : current.expand()) {
 
-    			h = heuristic.getValue(successor.getState());
-    			HeuristicNode hSuccessor = new HeuristicNode(successor, h);
+                h = heuristic.getValue(successor.getState()); //Mengambil value heuristik untuk successor
+                HeuristicNode hSuccessor = new HeuristicNode(successor, h); //Membuat node successor
     			
-    			if (open.contains(hSuccessor)) {
-    				keepBetterNodeOnOpenList(hSuccessor);
-    			} else if (!closed.contains(hSuccessor)) {
-    				open.add(hSuccessor);
-    			}
-    		}
-
+                if (open.contains(hSuccessor)) {
+                    keepBetterNodeOnOpenList(hSuccessor);
+                } else if (!closed.contains(hSuccessor)) {
+                    open.add(hSuccessor);
+                }
+            }
     	}
-
     }
     
     // Idea from: http://web.mit.edu/eranki/www/tutorials/search/
@@ -84,11 +75,10 @@ public class AStar {
           HeuristicNode existing = open.get(open.size()-1);
     	
     	if (existing != null) {
-    		if (existing.compareTo(successor) > 0) { //Jika existing > dari successor maka ambil successornya
-    			open.remove(existing);
-    			open.add(successor);
-    		}
+            if (existing.compareTo(successor) > 0) { //Jika existing > dari successor maka ambil successornya
+                open.remove(existing);
+                open.add(successor);
+            }
     	}
     }
-
 }
