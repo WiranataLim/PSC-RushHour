@@ -17,7 +17,7 @@ public class AStar {
 
     public State[] path; //Variabel untuk menyimpan path menuju solusi
     
-    private List<HeuristicNode> open = new ArrayList<HeuristicNode>(); //List untuk menyimpan node open
+    private SortableList<HeuristicNode> open = new SortableList<HeuristicNode>(); //List untuk menyimpan node open
     private List<HeuristicNode> closed = new ArrayList<HeuristicNode>(); //List untuk menyimpan node closed
 
     /**
@@ -31,6 +31,10 @@ public class AStar {
     	open.add(root);	//Menambahkan node root ke open list
     	
     	while(!open.isEmpty()) { //Hanya dijalankan ketika list open sudah diisi
+            
+            //sort isi dari list node open
+            open.sort();
+            
             HeuristicNode current = open.remove(0); //Current node diambil dari list open
     		
             if (current.getState().isGoal()) {
@@ -39,7 +43,7 @@ public class AStar {
                 path = new State[current.getDepth() + 1];
     			
                 //Current node diisi ke path node
-                HeuristicNode pathNode = current;
+                Node pathNode = current;
     			
                 //Mengambil state dari semua node yang ada di path dan disimpan ke array path
                 //Untuk mendapatkan path, current node (path node) digantikan dengan parentnya
@@ -72,7 +76,7 @@ public class AStar {
     
     // Idea from: http://web.mit.edu/eranki/www/tutorials/search/
       private void keepBetterNodeOnOpenList(HeuristicNode successor) {
-          HeuristicNode existing = open.get(open.size()-1);
+          HeuristicNode existing = open.get(open.get(successor));
     	
     	if (existing != null) {
             if (existing.compareTo(successor) > 0) { //Jika existing > dari successor maka ambil successornya
