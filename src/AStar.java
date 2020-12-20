@@ -13,7 +13,6 @@ import java.util.List;
  * should be set to <tt>null</tt>.  You may also wish to return other
  * information by adding additional fields to the class.
  */
-//test commit 2
 public class AStar {
 
     /** The solution path is stored here */
